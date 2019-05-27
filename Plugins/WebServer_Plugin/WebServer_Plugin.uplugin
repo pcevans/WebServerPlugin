@@ -1,0 +1,25 @@
+{
+    "FileVersion" : 3,
+    "Version" : 1,
+    "VersionName" : "0.1",
+    "FriendlyName" : "Web Server Plugin",
+    "Description" : "A plugin that can be used to create a local web server within the game with support for user-defined callback functions as well as regular service from a file structure.",
+    "Category" : "Web Server",
+    "CreatedBy" : "Clay Evans",
+    "CreatedByURL" : "https://pcevans.github.io/",
+    "DocsURL" : "",
+    "MarketplaceURL" : "",
+    "SupportURL" : "",
+    "EnabledByDefault" : true,
+    "CanContainContent" : false,
+    "IsBetaVersion" : false,
+    "Installed" : false,
+    "Modules" :
+    [
+        {
+            "Name" : "WebServer_Plugin",
+            "Type" : "Runtime",
+            "LoadingPhase" : "Default"
+        }
+    ]
+}

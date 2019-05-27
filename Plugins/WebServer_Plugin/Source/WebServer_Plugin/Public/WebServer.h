@@ -15,7 +15,7 @@ DECLARE_DYNAMIC_DELEGATE_OneParam(FOnRequestReceived, UConnection*, Connection);
  * 
  */
 UCLASS()
-class UNREALWEBSERVER_API AWebServer : public AActor
+class AWebServer : public AActor
 {
 	GENERATED_BODY()
 protected:

@@ -2,9 +2,9 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
+#include "Core.h"
+#include "CoreUObject.h"
 #include "Engine.h"
-#include "Object.h"
 #include "Networking.h"
 #include <string>
 #include <regex>
@@ -83,7 +83,7 @@ struct FSHTTPResponseDetails
  * 
  */
 UCLASS(BlueprintType)
-class UNREALWEBSERVER_API UConnection : public UObject
+class UConnection : public UObject
 {
 	GENERATED_BODY()
 
