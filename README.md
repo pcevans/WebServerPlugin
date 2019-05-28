@@ -1,4 +1,6 @@
 # WebServerPlugin
+************WORK IN PROGRESS***********
+
 A plugin for Unreal Engine 4 that uses Unreal's FSocket system to create a local web server. Built using Unreal Engine 4.22. 
 
 NOTE: To work as a web server, you must configure your router to forward connections to port 8080!
