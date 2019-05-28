@@ -49,20 +49,30 @@ void UConnection::CreateAndSendMessage()
 FString UConnection::CreateResponseMessage() 
 {
 	FString ResponseMessage = "HTTP/1.1 ";
-	ResponseMessage += ConvertStatusCodeToString(ResponseDetails.m_Code);
+	FString CodeText = ConvertStatusCodeToString(ResponseDetails.m_Code);
+	ResponseMessage += CodeText;
+	UE_LOG(LogTemp, Warning, TEXT("Response details: code = %s"), *CodeText);
 	ResponseMessage += "\n";
+
 	TArray<FString> HeaderKeys;
 	ResponseDetails.m_Headers.GetKeys(HeaderKeys);
+	UE_LOG(LogTemp,Warning,TEXT("Response details: Headers:"))
 	for (int i = 0; i < ResponseDetails.m_Headers.Num(); i++)
 	{
 		FString HeaderValue = ResponseDetails.m_Headers[HeaderKeys[i]];
-		ResponseMessage += HeaderKeys[i] + ": " + HeaderValue;
+		FString HeaderLine = HeaderKeys[i] + ": " + HeaderValue;
+		ResponseMessage += HeaderLine;
+		UE_LOG(LogTemp, Warning, TEXT("%s"), *(HeaderLine));
 		ResponseMessage += "\n";
 	}
 	ResponseMessage += "\n";
-	ResponseMessage += ConvertByteArrayToString(ResponseDetails.m_Body);
+	FString BodyMessage = ConvertByteArrayToString(ResponseDetails.m_Body);
+	ResponseMessage += BodyMessage;
+	UE_LOG(LogTemp, Warning, TEXT("Response details: Body:\n%s"), *BodyMessage);
 
-	UE_LOG(LogTemp, Warning, TEXT("Response Message:\n%s"), *ResponseMessage);
+	FString FullResponseDebugMessage = FString::Printf(TEXT("Response Message:\n%s"), *ResponseMessage);
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FullResponseDebugMessage);
+	UE_LOG(LogTemp, Warning, TEXT("%s"), *FullResponseDebugMessage);
 	return ResponseMessage;
 }
 
@@ -275,7 +285,9 @@ void UConnection::ParseRequestDetails(TArray<uint8> ReceivedData)
 	const FString ReceivedMessage = ConvertByteArrayToString(ReceivedData);
 	TArray<FString> RequestLines;
 	ReceivedMessage.ParseIntoArray(RequestLines, TEXT("\n"), false);
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("As String Data ~> %s"), *ReceivedMessage));
+	FString FullRequestDebugMessage = FString::Printf(TEXT("Request Message: \n%s"), *ReceivedMessage);
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FullRequestDebugMessage);
+	UE_LOG(LogTemp, Warning, TEXT("%s"), *FullRequestDebugMessage);
 
 	int LineNumber = 0;
 	ParseRequestLine(RequestLines[LineNumber], ParsedRequestDetails);// ParsedRequestDetails.m_Verb, ParsedRequestDetails.m_FileURL, ParsedRequestDetails.m_QueryParameters, ParsedRequestDetails.m_BaseDirectory, RequestDetails.m_SubDirectories);
@@ -301,6 +313,12 @@ void UConnection::ParseRequestDetails(TArray<uint8> ReceivedData)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("%s: %s"), *QueryKeys[i], *ParsedRequestDetails.m_QueryParameters[QueryKeys[i]]);
 	}
+	UE_LOG(LogTemp, Warning, TEXT("Request details: Subdirectories:"));
+	for (int i = 0; i < ParsedRequestDetails.m_SubDirectories.Num(); i++)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Subdirectory %d: %s"), i, *ParsedRequestDetails.m_SubDirectories[i]);
+	}
+
 
 	RequestDetails = ParsedRequestDetails;
 }
@@ -340,16 +358,21 @@ void UConnection::ParseRequestLine(FString Line, FSHTTPRequestDetails &ParsedReq
 		QueryString = QueryCaptureGroups.suffix();
 	}
 
-	std::regex DirectoryRegex("(/[^/]*)");
+	std::regex DirectoryRegex("([^/]*/?)");
 	std::smatch DirectoryCaptureGroups;
 	std::string DirectoryString = WebPagePath;
-	while (std::regex_search(DirectoryString, DirectoryCaptureGroups, DirectoryRegex))
+	
+	while (DirectoryString != "" && std::regex_search(DirectoryString, DirectoryCaptureGroups, DirectoryRegex))
 	{
+		FString SubDirectory = DirectoryCaptureGroups[1].str().c_str();
 		if (DirectoryString.compare(WebPagePath) == 0)
 		{
-			ParsedRequestDetails.m_BaseDirectory = DirectoryCaptureGroups[1].str().c_str();
+			ParsedRequestDetails.m_BaseDirectory = SubDirectory;
 		}
-		FString SubDirectory = DirectoryCaptureGroups[1].str().c_str();
+		else
+		{
+			SubDirectory.RemoveFromEnd("/");
+		}
 		ParsedRequestDetails.m_SubDirectories.Add(SubDirectory);
 		DirectoryString = DirectoryCaptureGroups.suffix();
 	}

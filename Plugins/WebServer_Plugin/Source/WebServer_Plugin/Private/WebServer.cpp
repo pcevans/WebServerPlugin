@@ -161,7 +161,9 @@ void AWebServer::ConnectionSocketLoop()
 		UE_LOG(LogTemp, Warning, TEXT("Removed another empty requester..."));
 	}
 
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Bytes read %d from connection %d"), ReceivedData.Num(), frame));
+	FString ReceiveDataDebugMessage = FString::Printf(TEXT("Bytes read %d from connection %d"), ReceivedData.Num(), frame);
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("%s"), *ReceiveDataDebugMessage));
+	UE_LOG(LogTemp, Warning, TEXT("%s"), *ReceiveDataDebugMessage);
 }
 
 FOnRequestReceived *AWebServer::GetRegisteredCallback(TArray<FString> SubDirectories)
@@ -175,6 +177,10 @@ FOnRequestReceived *AWebServer::GetRegisteredCallback(TArray<FString> SubDirecto
 			(*URLOverrides.Find(SubDirectoryBuilder) == true || i == SubDirectories.Num() - 1))
 		{
 			return URLCallbacks.Find(SubDirectoryBuilder);
+		}
+		else if (i != 0 && i != SubDirectories.Num() - 1)
+		{
+			SubDirectoryBuilder += "/";
 		}
 	}
 	return nullptr;
