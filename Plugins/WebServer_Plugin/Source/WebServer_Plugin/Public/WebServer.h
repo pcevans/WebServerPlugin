@@ -28,6 +28,7 @@ private:
 	FTimerHandle ConnectionTimer;
 
 	TMap<FString, FOnRequestReceived> URLCallbacks;
+	TMap<FString, FString> URLHTMLResponses;
 	TMap<FString, bool> URLOverrides;
 public:
 	UFUNCTION(BlueprintCallable, Category = "Web Server")
@@ -37,14 +38,15 @@ public:
 	void ShutdownServer();
 
 	UFUNCTION(BlueprintCallable, Category = "Web Server")
-	void RegisterURL(FString URL, FString Verb, const FOnRequestReceived& Callback, bool bCaptureSubDirectoryURLs);
+	void RegisterCallbackAtURL(FString URL, const FOnRequestReceived& Callback, bool bCaptureSubDirectoryURLs);
 
-	//void RegisterURL(FString URI /*, callback*/);
+	UFUNCTION(BlueprintCallable, Category = "Web Server")
+	void RegisterHTMLAtURL(FString URL, FString HTML, bool bCaptureSubDirectoryURLs);
 
 private:
 	void ListenerSocketLoop();
 
 	void ConnectionSocketLoop();
 
-	FString GetRegisteredURL(TArray<FString> SubDirectories);
+	FOnRequestReceived *GetRegisteredCallback(TArray<FString> SubDirectories);
 };

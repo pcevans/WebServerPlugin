@@ -18,11 +18,14 @@ void UConnection::Initialize(FSocket *Socket, TArray<uint8> ReceivedData)
 
 void UConnection::SendResponse()
 {
-
+	CreateAndSendMessage();
 }
 
 void UConnection::SendResponseWithDetails(FSHTTPResponseDetails Details)
 {
+	ResponseDetails = Details;
+
+	CreateAndSendMessage();
 }
 
 void UConnection::SendSimpleHTMLResponse(int32 ResponseCode, FString HTML)
