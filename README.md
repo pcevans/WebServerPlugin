@@ -1,6 +1,8 @@
 # WebServerPlugin
 A plugin for Unreal Engine 4 that uses Unreal's FSocket system to create a local web server. Built using Unreal Engine 4.22. 
 
+NOTE: To work as a web server, you must configure your router to forward connections to port 8080!
+
 Currently verified to work on the following platforms: Windows, Android.
 
 Eventual support for the following platforms: iOS, Mac, Linux.
@@ -19,7 +21,7 @@ The WebServer connects the Unreal Engine to requests received on localhost:8080 
 
 The server will process a request according to the first applicable category in the following list:
 
-1) Receive callback through C++Blueprints.
+1) Receive callback through C++/Blueprints.
 - Through C++/Blueprints, the developer can bind a callback function to a request for a certain page or file. This callback function will be responsible for sending a message back to the client.
 2) Find and send file from plugin's "Root" directory or from runtime HTML assignment. **[WIP]**
 - The web server can serve statically if there is a file available to serve within the correct directory (the plugin's "Root" directory) in the file system, or if the developer has assigned an HTML response for the URL.
