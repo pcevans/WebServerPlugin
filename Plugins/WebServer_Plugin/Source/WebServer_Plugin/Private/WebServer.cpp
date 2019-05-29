@@ -67,7 +67,7 @@ void AWebServer::ListenerSocketLoop()
 	if (ListenerSocket->HasPendingConnection(Pending) && Pending)
 	{
 		//New Connection receive!
-		FSocket* ConnectionSocket = ListenerSocket->Accept(*RemoteAddress, TEXT("Received new socket connection!"));
+		FSocket* ConnectionSocket = ListenerSocket->Accept(*RemoteAddress, TEXT("Web Server Connection"));
 		//ConnectionSocket->
 
 		if (ConnectionSocket != NULL)
@@ -81,7 +81,7 @@ void AWebServer::ListenerSocketLoop()
 
 void AWebServer::ConnectionSocketLoop()
 {
-	//~~~~~~~~~~~~~
+	//~~~~~Update which connection we will check this frame~~~~~~~~
 	static int32 frame = 0;
 	if (ConnectionSockets.Num() <= frame)
 		frame = 0;
@@ -96,7 +96,7 @@ void AWebServer::ConnectionSocketLoop()
 		return;
 	}
 	frame++;
-	//~~~~~~~~~~~~~
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 	//Binary data buffer for connection
 	TArray<uint8> ReceivedData;
@@ -120,20 +120,15 @@ void AWebServer::ConnectionSocketLoop()
 		}
 		else
 		{
-			Connection->SendSimpleHTMLResponse(404, "<!DOCTYPE html><html><body><h1>404</h1><p>No page exists at " + Connection->GetRequestFileURL() + " or " + Connection->GetRequestBaseDirectory() + ".</p></body></html>");
-
-		}
-		/*else
-		{
-			FString *RegisteredHTMLResponse = GetRegisteredHTMLResponse(Connection->GetRequestSubDirectories());
-			if (RegisteredHTMLResponse != nullptr)
+			FString RegisteredHTMLResponse = GetRegisteredHTMLResponse(Connection->GetRequestSubDirectories());
+			if (RegisteredHTMLResponse != "")
 			{
 				Connection->SendSimpleHTMLResponse(200, *RegisteredHTMLResponse);
 			}
 			else
 			{
 				bool bFileLoadSuccess = false;
-				FString FoundFilePath = FindInDirectory(FPaths::Combine(FPaths::ProjectDir() + "WebServerRoot" + Connection->GetRequestFileURL()));
+				/*FString FoundFilePath = FindInDirectory(FPaths::Combine(FPaths::ProjectDir() + "WebServerRoot" + Connection->GetRequestFileURL()));
 				if (FoundFilePath.Len() > 0)
 				{
 					TArray<uint8> EncodedFile;
@@ -147,12 +142,19 @@ void AWebServer::ConnectionSocketLoop()
 						Connection->SendResponse();
 						bFileLoadSuccess = true;
 					}
+				}*/
+				if (!bFileLoadSuccess)
+				{
+					Connection->SendSimpleHTMLResponse(404, "<!DOCTYPE html><html><body><h1>404</h1><p>No page exists at " + Connection->GetRequestFileURL() + " or " + Connection->GetRequestBaseDirectory() + ".</p></body></html>");
 				}
-				Connection->SendSimpleHTMLResponse(404, "<!DOCTYPE html><html><body><h1>404</h1><p>No page exists at " + Connection->GetRequestFileURL() + " or " + Connection->GetRequestBaseDirectory() + ".</p></body></html>");
 			}
-		}*/
+			/*else
+			{
+				Connection->SendSimpleHTMLResponse(404, "<!DOCTYPE html><html><body><h1>404</h1><p>No page exists at " + Connection->GetRequestFileURL() + " or " + Connection->GetRequestBaseDirectory() + ".</p></body></html>");
+			}*/
+		}
 
-		UE_LOG(LogTemp,Warning,TEXT("Data Read! %d"), ReceivedData.Num());
+		UE_LOG(LogTemp,Warning,TEXT("Data read! %d"), ReceivedData.Num());
 	}
 	else
 	{
@@ -168,7 +170,6 @@ void AWebServer::ConnectionSocketLoop()
 
 FOnRequestReceived *AWebServer::GetRegisteredCallback(TArray<FString> SubDirectories)
 {
-
 	FString SubDirectoryBuilder = "";
 	for (int i = 0; i < SubDirectories.Num(); i++)
 	{
@@ -186,5 +187,21 @@ FOnRequestReceived *AWebServer::GetRegisteredCallback(TArray<FString> SubDirecto
 	return nullptr;
 }
 
-
-
+FString AWebServer::GetRegisteredHTMLResponse(TArray<FString> SubDirectories)
+{
+	FString SubDirectoryBuilder = "";
+	for (int i = 0; i < SubDirectories.Num(); i++)
+	{
+		SubDirectoryBuilder += SubDirectories[i];
+		if (URLHTMLResponses.Contains(SubDirectoryBuilder) &&
+			(*URLOverrides.Find(SubDirectoryBuilder) == true || i == SubDirectories.Num() - 1))
+		{
+			return URLHTMLResponses[SubDirectoryBuilder];
+		}
+		else if (i != 0 && i != SubDirectories.Num() - 1)
+		{
+			SubDirectoryBuilder += "/";
+		}
+	}
+	return "";
+}

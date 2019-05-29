@@ -5,8 +5,9 @@
 #include "Core.h"
 #include "Engine.h"
 #include "Networking.h"
+
 #include "Connection.h"
-#include "UObject/NoExportTypes.h"
+
 #include "WebServer.generated.h"
 
 
@@ -49,4 +50,6 @@ private:
 	void ConnectionSocketLoop();
 
 	FOnRequestReceived *GetRegisteredCallback(TArray<FString> SubDirectories);
+
+	FString GetRegisteredHTMLResponse(TArray<FString> SubDirectories);
 };

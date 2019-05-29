@@ -2,12 +2,16 @@
 
 #pragma once
 
+#include <string>
+#include <regex>
+
 #include "Core.h"
 #include "CoreUObject.h"
 #include "Engine.h"
 #include "Networking.h"
-#include <string>
-#include <regex>
+
+#include "DataConversionLibrary.h"
+
 #include "Connection.generated.h"
 
 USTRUCT(BlueprintType)
@@ -94,10 +98,6 @@ private:
 	FSHTTPResponseDetails ResponseDetails;
 
 public:
-	FString ConvertByteArrayToString(TArray<uint8> BinaryArray); //PLACE IN FUNCTION LIBRARY
-	TArray<uint8> ConvertStringToByteArray(FString String);
-	FString ConvertStatusCodeToString(int32 StatusCode);
-
 	void Initialize(FSocket *ConnectionSocket, TArray<uint8> ReceivedData);
 
 	UFUNCTION(BlueprintCallable, Category = "Web Server Response")
@@ -144,8 +144,6 @@ public:
 
 	UFUNCTION(BlueprintPure,Category = "Web Server Request")
 		TArray<uint8> GetRequestBody() { return RequestDetails.m_Body; }
-
-	//UFUNCTION(BlueprintPure,Category = "Web Server Request")
 	
 	UFUNCTION(BlueprintPure, Category = "Web Server Request")
 		FString GetRequestBaseDirectory() { return RequestDetails.m_BaseDirectory; }
@@ -156,19 +154,12 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Web Server Request")
 		FSHTTPRequestDetails GetRequestDetails() { return RequestDetails; }
 
-
 private:
-	//FString GetHTMLResponse(FSHTTPRequestDetails RequestDetails, bool &bResponseExists);
-
 	void CreateAndSendMessage();
 	FString CreateResponseMessage();
 
 	void ParseRequestDetails(TArray<uint8> ReceivedData);
-	void ParseRequestLine(FString Line, FSHTTPRequestDetails &ParsedRequestDetails); //FString &Verb, FString &RelativeURI, TMap<FString, FString> &QueryParameters, FString &BaseDirectory, TArray<FString> &SubDirectories);
-	void ParseHeaderLine(FString Line, FSHTTPRequestDetails &ParsedRequestDetails); //FString &Host, TMap<FString, FString> &HeaderMap);
-	//void ParseBodyLines(TArray<FString> RequestLines, int32 StartingLineNumber, FSHTTPRequestDetails &ParsedRequestDetails); //TArray<uint8> &ByteArray);
-
-	void ServeWebPage();
-
-	
+	void ParseRequestLine(FString Line, FSHTTPRequestDetails &ParsedRequestDetails);
+	void ParseHeaderLine(FString Line, FSHTTPRequestDetails &ParsedRequestDetails);
+	void ParseBody(TArray<FString> RequestLines, FSHTTPRequestDetails &ParsedRequestDetails, int32 StartLine);	
 };
