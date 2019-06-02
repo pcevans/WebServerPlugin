@@ -7,6 +7,7 @@
 #include "Networking.h"
 
 #include "Connection.h"
+#include "DataConversionLibrary.h"
 
 #include "WebServer.generated.h"
 
@@ -30,7 +31,8 @@ private:
 
 	TMap<FString, FOnRequestReceived> URLCallbacks;
 	TMap<FString, FString> URLHTMLResponses;
-	TMap<FString, bool> URLOverrides;
+	TMap<FString, bool> SubURLCaptureAllowed;
+	TMap<FString, FString> MIMETypeOverrides;
 public:
 	UFUNCTION(BlueprintCallable, Category = "Web Server")
 	void StartServer();
@@ -43,6 +45,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Web Server")
 	void RegisterHTMLAtURL(FString URL, FString HTML, bool bCaptureSubDirectoryURLs);
+
+	UFUNCTION(BlueprintCallable, Category = "Web Server")
+	void RegisterMIMETypeForExtension(FString Extension, FString MIMEType);
 
 private:
 	void ListenerSocketLoop();

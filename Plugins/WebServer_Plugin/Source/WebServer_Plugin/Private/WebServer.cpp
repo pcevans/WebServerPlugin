@@ -12,8 +12,6 @@ void AWebServer::EndPlay(EEndPlayReason::Type EndPlayReason)
 
 void AWebServer::StartServer()
 {
-	//RegisterHTMLResponses();
-
 	FIPv4Endpoint Endpoint(FIPv4Address(127,0,0,1), 8080);
 	FString SocketName = "localhost";
 	ListenerSocket = FTcpSocketBuilder(*SocketName)
@@ -44,13 +42,18 @@ void AWebServer::ShutdownServer()
 void AWebServer::RegisterCallbackAtURL(FString URL, const FOnRequestReceived& URLCallback, bool bCaptureSubDirectoryURLs)
 {
 	URLCallbacks.Add(URL, URLCallback);
-	URLOverrides.Add(URL, bCaptureSubDirectoryURLs);
+	SubURLCaptureAllowed.Add(URL, bCaptureSubDirectoryURLs);
 }
 
 void AWebServer::RegisterHTMLAtURL(FString URL, FString HTMLString, bool bCaptureSubDirectoryURLs)
 {
 	URLHTMLResponses.Add(URL, HTMLString);
-	URLOverrides.Add(URL, bCaptureSubDirectoryURLs);
+	SubURLCaptureAllowed.Add(URL, bCaptureSubDirectoryURLs);
+}
+
+void AWebServer::RegisterMIMETypeForExtension(FString Extension, FString MIMEType)
+{
+	MIMETypeOverrides.Add(Extension, MIMEType);
 }
 
 void AWebServer::ListenerSocketLoop()
@@ -98,6 +101,8 @@ void AWebServer::ConnectionSocketLoop()
 	frame++;
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+	static FString RootFolderPath = FPaths::ProjectDir() + "WebServerRoot";
+
 	//Binary data buffer for connection
 	TArray<uint8> ReceivedData;
 
@@ -128,21 +133,33 @@ void AWebServer::ConnectionSocketLoop()
 			else
 			{
 				bool bFileLoadSuccess = false;
-				/*FString FoundFilePath = FindInDirectory(FPaths::Combine(FPaths::ProjectDir() + "WebServerRoot" + Connection->GetRequestFileURL()));
-				if (FoundFilePath.Len() > 0)
+				FString FilePath = RootFolderPath + Connection->GetRequestFileURL();
+				if (FilePath.Len() > 0)
 				{
-					TArray<uint8> EncodedFile;
-					FString ContentType;
-
-					if (ConvertFile(FoundFilePath, EncodedFile, ContentType))
+					FString PathSansExtension, Extension;
+					if (FilePath.Split(".", &PathSansExtension, &Extension, ESearchCase::IgnoreCase, ESearchDir::FromEnd) && Extension.Len() > 0 && Extension.Len() < 6)
 					{
-						Connection->SetResponseCode(200);
-						Connection->SetResponseHeader("Content-Type", ContentType);
-						Connection->SetResponseBody(EncodedFile);
-						Connection->SendResponse();
-						bFileLoadSuccess = true;
+						TArray<uint8> EncodedFile;
+						FString ContentType;
+
+						TArray<uint8> FileByteArray = UDataConversionLibrary::ConvertFileToByteArray(FilePath);
+						if (FileByteArray.Num() != 0)
+						{
+							Connection->SetResponseCode(200);
+							if (MIMETypeOverrides.Contains(Extension))
+							{
+								Connection->SetResponseHeader("Content-Type", MIMETypeOverrides[Extension]);
+							}
+							else
+							{
+								Connection->SetResponseHeader("Content-Type", UDataConversionLibrary::ConvertFileTypeToMIMEType(Extension));
+							}
+							Connection->SetResponseBody(FileByteArray);
+							Connection->SendResponse();
+							bFileLoadSuccess = true;
+						}
 					}
-				}*/
+				}
 				if (!bFileLoadSuccess)
 				{
 					Connection->SendSimpleHTMLResponse(404, "<!DOCTYPE html><html><body><h1>404</h1><p>No page exists at " + Connection->GetRequestFileURL() + " or " + Connection->GetRequestBaseDirectory() + ".</p></body></html>");
@@ -175,7 +192,7 @@ FOnRequestReceived *AWebServer::GetRegisteredCallback(TArray<FString> SubDirecto
 	{
 		SubDirectoryBuilder += SubDirectories[i];
 		if (URLCallbacks.Contains(SubDirectoryBuilder) &&
-			(*URLOverrides.Find(SubDirectoryBuilder) == true || i == SubDirectories.Num() - 1))
+			(*SubURLCaptureAllowed.Find(SubDirectoryBuilder) == true || i == SubDirectories.Num() - 1))
 		{
 			return URLCallbacks.Find(SubDirectoryBuilder);
 		}
@@ -194,7 +211,7 @@ FString AWebServer::GetRegisteredHTMLResponse(TArray<FString> SubDirectories)
 	{
 		SubDirectoryBuilder += SubDirectories[i];
 		if (URLHTMLResponses.Contains(SubDirectoryBuilder) &&
-			(*URLOverrides.Find(SubDirectoryBuilder) == true || i == SubDirectories.Num() - 1))
+			(*SubURLCaptureAllowed.Find(SubDirectoryBuilder) == true || i == SubDirectories.Num() - 1))
 		{
 			return URLHTMLResponses[SubDirectoryBuilder];
 		}

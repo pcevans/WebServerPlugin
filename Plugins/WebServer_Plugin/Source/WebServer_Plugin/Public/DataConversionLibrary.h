@@ -35,6 +35,8 @@ public:
 		static TArray<uint8> ConvertStringToByteArray(FString String);
 	UFUNCTION(BlueprintCallable, Category = "Data Conversion")
 		static FString ConvertHTTPStatusCodeToString(int32 StatusCode);
+	UFUNCTION(BlueprintCallable, Category = "Data Conversion")
+		static TArray<uint8> ConvertFileToByteArray(FString FullFilePath);
 	//UFUNCTION(BlueprintCallable, Category = "Data Conversion")
 	//	static FSDataObject ConvertJSONToDataObject(FString JSON);
 	//UFUNCTION(BlueprintCallable, Category = "Data Conversion")
@@ -43,6 +45,8 @@ public:
 		static FSHTTPRequestDetails ConvertHTTPRequestBytesToDetailStruct(TArray<uint8> RequestBytes);
 	UFUNCTION(BlueprintCallable, Category = "Data Conversion")
 		static TArray<uint8> ConvertHTTPResponseDetailStructToBytes(FSHTTPResponseDetails ResponseStruct);
+	UFUNCTION(BlueprintCallable, Category = "Data Conversion")
+		static FString ConvertFileTypeToMIMEType(FString FileExtension);
 
 
 private:

@@ -19,6 +19,56 @@ TArray<uint8> UDataConversionLibrary::ConvertStringToByteArray(FString String)
 	return StringByteArray;
 }
 
+TArray<uint8> UDataConversionLibrary::ConvertFileToByteArray(FString FullFilePath)
+{
+	TArray<uint8> FileByteArray;
+	FFileHelper::LoadFileToArray(FileByteArray, *FullFilePath);
+	return FileByteArray;
+}
+
+TMap<FString, FString> MIMETypeMap = {
+	//default
+	TPairInitializer<const FString&, const FString&>("default","application/octet-stream"),
+	//application
+	TPairInitializer<const FString&, const FString&>("7z","application/x-7z-compressed"), TPairInitializer<const FString&, const FString&>("apk","application/vnd.android.package-archive"),
+	TPairInitializer<const FString&, const FString&>("jar", "application/java-archive"),
+	TPairInitializer<const FString&, const FString&>("js", "application/javascript"), TPairInitializer<const FString&, const FString&>("json", "application/json"),
+	TPairInitializer<const FString&, const FString&>("exe", "application/x-msdownload"),
+	TPairInitializer<const FString&, const FString&>("pdf","application/pdf"), TPairInitializer<const FString&, const FString&>("psd","application/photoshop"),
+	TPairInitializer<const FString&, const FString&>("rar","application/x-rar-compressed"),
+	TPairInitializer<const FString&, const FString&>("swf","application/x-shockwave-flash"),
+	TPairInitializer<const FString&, const FString&>("tar", "application/x-tar"), TPairInitializer<const FString&, const FString&>("torrent", "application/x-bittorent"),
+	TPairInitializer<const FString&, const FString&>("xml","application/xml"), TPairInitializer<const FString&, const FString&>("xhtml","application/xhtml+xml"),
+	TPairInitializer<const FString&, const FString&>("zip","application/zip"),
+	//application - Microsoft Office
+	TPairInitializer<const FString&, const FString&>("doc","application/msword"), TPairInitializer<const FString&, const FString&>("ppt","application/vnd.ms-powerpoint"), TPairInitializer<const FString&, const FString&>("xls","application/vnd.ms-excel"),
+	TPairInitializer<const FString&, const FString&>("docx","application/vnd.openxmlformats-officedocument.wordprocessingml.document"),
+	TPairInitializer<const FString&, const FString&>("pptx","application/vnd.openxmlformats-officedocument.presentationml.presentation"),
+	TPairInitializer<const FString&, const FString&>("xlsx","application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
+	//audio
+	TPairInitializer<const FString&, const FString&>("aac","audio/aac"), TPairInitializer<const FString&, const FString&>("mp3","audio/mpeg"), TPairInitializer<const FString&, const FString&>("ogg","audio/ogg"), 
+	TPairInitializer<const FString&, const FString&>("wav","audio/wav"), TPairInitializer<const FString&, const FString&>("weba","audio/webm"), TPairInitializer<const FString&, const FString&>("wma","audio/x-ms-wma"),
+	//image
+	TPairInitializer<const FString&, const FString&>("bmp","image/bmp"), TPairInitializer<const FString&, const FString&>("gif", "image/gif"), TPairInitializer<const FString&, const FString&>("ico", "image/x-icon"), 
+	TPairInitializer<const FString&, const FString&>("jpg","image/jpeg"), TPairInitializer<const FString&, const FString&>("jpeg","image/jpeg"), TPairInitializer<const FString&, const FString&>("png", "image/png"), 
+	TPairInitializer<const FString&, const FString&>("tiff","image/tiff"), 
+	//text
+	TPairInitializer<const FString&, const FString&>("css", "text/css"), TPairInitializer<const FString&, const FString&>("csv", "text/csv"), TPairInitializer<const FString&, const FString&>("htm","text/html"), 
+	TPairInitializer<const FString&, const FString&>("html", "text/html"), TPairInitializer<const FString&, const FString&>("rtf","text/rtf"), TPairInitializer<const FString&, const FString&>("txt","text/plain"),
+	//video
+	TPairInitializer<const FString&, const FString&>("avi","video/x-msvideo"),TPairInitializer<const FString&, const FString&>("flv","video/x-flv"), TPairInitializer<const FString&, const FString&>("mid","audio/midi"), TPairInitializer<const FString&, const FString&>("mp4","video/mp4"), TPairInitializer<const FString&, const FString&>("mpeg","video/mpeg"),
+	TPairInitializer<const FString&, const FString&>("ogv","video/ogg"), TPairInitializer<const FString&, const FString&>("webm","video/webm"), TPairInitializer<const FString&, const FString&>("wmv","video/x-ms-wmv"),
+ };
+
+
+FString UDataConversionLibrary::ConvertFileTypeToMIMEType(FString FileExtension)
+{
+	if (MIMETypeMap.Contains(FileExtension))
+		return MIMETypeMap[FileExtension];
+	else
+		return MIMETypeMap["default"];
+}
+
 /*FSDataObject UDataConversionLibrary::ConvertJSONToDataObject(FString JSON)
 {
 	FSDataObject DataObject;
@@ -34,7 +84,7 @@ void UDataConversionLibrary::ParseJsonInternal(FSDataObject &DataObject, std::st
 
 	const static std::regex ObjectRegex("{(.*)}");
 	const static std::regex AttributeRegex("\"([^\"]*)\":?(.*)");
-	const static std::regex ArrayRegex("[[]([^]]*)]");
+	const static std::regex ArrayRegex("\\[([^]]*)]");
 
 	if (JSON.length() == 0)
 		return;
