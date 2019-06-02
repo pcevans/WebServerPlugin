@@ -39,6 +39,7 @@ void UDataConversionLibrary::ParseJsonInternal(FSDataObject &DataObject, std::st
 	if (JSON.length() == 0)
 		return;
 
+
 	std::smatch JsonCaptureGroups;
 	std::string CurrentJson = JSON;
 	switch (LastType)
