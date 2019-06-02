@@ -35,8 +35,8 @@ public:
 		static TArray<uint8> ConvertStringToByteArray(FString String);
 	UFUNCTION(BlueprintCallable, Category = "Data Conversion")
 		static FString ConvertHTTPStatusCodeToString(int32 StatusCode);
-	UFUNCTION(BlueprintCallable, Category = "Data Conversion")
-		static FSDataObject ConvertJSONToDataObject(FString JSON);
+	//UFUNCTION(BlueprintCallable, Category = "Data Conversion")
+	//	static FSDataObject ConvertJSONToDataObject(FString JSON);
 	//UFUNCTION(BlueprintCallable, Category = "Data Conversion")
 	//	static FSDataObject ConvertXMLToDataObject(FString XML);
 	UFUNCTION(BlueprintCallable, Category = "Data Conversion")

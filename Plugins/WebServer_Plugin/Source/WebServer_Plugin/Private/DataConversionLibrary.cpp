@@ -19,7 +19,7 @@ TArray<uint8> UDataConversionLibrary::ConvertStringToByteArray(FString String)
 	return StringByteArray;
 }
 
-FSDataObject UDataConversionLibrary::ConvertJSONToDataObject(FString JSON)
+/*FSDataObject UDataConversionLibrary::ConvertJSONToDataObject(FString JSON)
 {
 	FSDataObject DataObject;
 	std::string JsonString = TCHAR_TO_UTF8(*JSON);
@@ -27,7 +27,7 @@ FSDataObject UDataConversionLibrary::ConvertJSONToDataObject(FString JSON)
 	ParseJsonInternal(DataObject, JsonString, EJsonTypes::None);
 
 	return DataObject;
-}
+}*/
 
 void UDataConversionLibrary::ParseJsonInternal(FSDataObject &DataObject, std::string JSON, EJsonTypes LastType)
 {
@@ -80,7 +80,7 @@ void UDataConversionLibrary::ParseJsonInternal(FSDataObject &DataObject, std::st
 		break;
 	case EJsonTypes::Array:
 		//determine whether object or single-value array
-		//determine whether from object or from attribute for naming
+		//determine whether from object or from attribute for parent attribute naming
 		break;
 	case EJsonTypes::Attribute:
 		//determine whether object, array, or single-value attribute
