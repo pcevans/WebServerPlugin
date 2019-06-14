@@ -32,11 +32,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Data Conversion")
 		static FString ConvertByteArrayToString(TArray<uint8> ByteArray);
 	UFUNCTION(BlueprintCallable, Category = "Data Conversion")
-		static TArray<uint8> ConvertStringToByteArray(FString String);
+		static TArray<uint8> ConvertStringToByteArray(FString String, bool bStripStringEnding=true);
 	UFUNCTION(BlueprintCallable, Category = "Data Conversion")
 		static FString ConvertHTTPStatusCodeToString(int32 StatusCode);
-	UFUNCTION(BlueprintCallable, Category = "Data Conversion")
-		static TArray<uint8> ConvertFileToByteArray(FString FullFilePath);
+	//UFUNCTION(BlueprintCallable, Category = "Data Conversion")
+		static TArray<uint8> *ConvertFileToByteArray(FString FullFilePath);
 	//UFUNCTION(BlueprintCallable, Category = "Data Conversion")
 	//	static FSDataObject ConvertJSONToDataObject(FString JSON);
 	//UFUNCTION(BlueprintCallable, Category = "Data Conversion")

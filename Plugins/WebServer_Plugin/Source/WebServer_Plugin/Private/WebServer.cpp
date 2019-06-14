@@ -101,7 +101,7 @@ void AWebServer::ConnectionSocketLoop()
 	frame++;
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-	static FString RootFolderPath = FPaths::ProjectDir() + "WebServerRoot";
+	static FString RootFolderPath = FPaths::ProjectContentDir() + "WebServerRoot";
 
 	//Binary data buffer for connection
 	TArray<uint8> ReceivedData;
@@ -142,7 +142,7 @@ void AWebServer::ConnectionSocketLoop()
 						TArray<uint8> EncodedFile;
 						FString ContentType;
 
-						TArray<uint8> FileByteArray = UDataConversionLibrary::ConvertFileToByteArray(FilePath);
+						TArray<uint8> FileByteArray = *UDataConversionLibrary::ConvertFileToByteArray(FilePath);
 						if (FileByteArray.Num() != 0)
 						{
 							Connection->SetResponseCode(200);
@@ -154,6 +154,7 @@ void AWebServer::ConnectionSocketLoop()
 							{
 								Connection->SetResponseHeader("Content-Type", UDataConversionLibrary::ConvertFileTypeToMIMEType(Extension));
 							}
+							Connection->SetResponseHeader("Content-Length", FString::FromInt(FileByteArray.Num()));
 							Connection->SetResponseBody(FileByteArray);
 							Connection->SendResponse();
 							bFileLoadSuccess = true;

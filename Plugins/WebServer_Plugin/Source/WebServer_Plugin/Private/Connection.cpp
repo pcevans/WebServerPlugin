@@ -31,7 +31,7 @@ void UConnection::SendSimpleHTMLResponse(int32 ResponseCode, FString HTML)
 {
 	ResponseDetails.m_Code = ResponseCode;
 	ResponseDetails.m_Headers.Add("Content-Type", "text/html");
-	ResponseDetails.m_Body = UDataConversionLibrary::ConvertStringToByteArray(HTML);
+	ResponseDetails.m_Body = UDataConversionLibrary::ConvertStringToByteArray(HTML, true);
 
 	CreateAndSendMessage();
 }

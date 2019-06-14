@@ -13,16 +13,23 @@ FString UDataConversionLibrary::ConvertByteArrayToString(TArray<uint8> ByteArray
 	return FString(ANSI_TO_TCHAR(reinterpret_cast<const char*>(ByteArray.GetData())));
 }
 
-TArray<uint8> UDataConversionLibrary::ConvertStringToByteArray(FString String)
+TArray<uint8> UDataConversionLibrary::ConvertStringToByteArray(FString String, bool bStripStringEnding)
 {
 	TArray<uint8> StringByteArray(String.GetCharArray());
+	if (bStripStringEnding)
+	{
+		while (StringByteArray[StringByteArray.Num() - 1] == '\0')
+			StringByteArray.RemoveAt(StringByteArray.Num() - 1);
+	}
 	return StringByteArray;
 }
 
-TArray<uint8> UDataConversionLibrary::ConvertFileToByteArray(FString FullFilePath)
+TArray<uint8> *UDataConversionLibrary::ConvertFileToByteArray(FString FullFilePath)
 {
-	TArray<uint8> FileByteArray;
-	FFileHelper::LoadFileToArray(FileByteArray, *FullFilePath);
+	TArray<uint8> *FileByteArray = new TArray<uint8>();
+	FFileHelper::LoadFileToArray(*FileByteArray, *FullFilePath);
+	//FileByteArray->RemoveAt(FileByteArray->Num() - 1);
+	//FileByteArray->RemoveAt(FileByteArray.Num() - 1);
 	return FileByteArray;
 }
 
@@ -379,23 +386,24 @@ TArray<uint8> UDataConversionLibrary::ConvertHTTPResponseDetailStructToBytes(FSH
 	FString CodeText = UDataConversionLibrary::ConvertHTTPStatusCodeToString(ParsedResponseDetails.m_Code);
 	ResponseMessage += CodeText;
 	UE_LOG(LogTemp, Warning, TEXT("Response details: code = %s"), *CodeText);
-	ResponseMessage += "\n";
+	ResponseMessage += "\r\n";
 
 	TArray<FString> HeaderKeys;
 	ParsedResponseDetails.m_Headers.GetKeys(HeaderKeys);
-	UE_LOG(LogTemp, Warning, TEXT("Response details: Headers:"))
-		for (int i = 0; i < ParsedResponseDetails.m_Headers.Num(); i++)
-		{
-			FString HeaderValue = ParsedResponseDetails.m_Headers[HeaderKeys[i]];
-			FString HeaderLine = HeaderKeys[i] + ": " + HeaderValue;
-			ResponseMessage += HeaderLine;
-			UE_LOG(LogTemp, Warning, TEXT("%s"), *(HeaderLine));
-			ResponseMessage += "\n";
-		}
-	ResponseMessage += "\n";
+	UE_LOG(LogTemp, Warning, TEXT("Response details: Headers:"));
+	for (int i = 0; i < ParsedResponseDetails.m_Headers.Num(); i++)
+	{
+		FString HeaderValue = ParsedResponseDetails.m_Headers[HeaderKeys[i]];
+		FString HeaderLine = HeaderKeys[i] + ": " + HeaderValue;
+		ResponseMessage += HeaderLine;
+		UE_LOG(LogTemp, Warning, TEXT("%s"), *(HeaderLine));
+		ResponseMessage += "\r\n";
+	}
+	ResponseMessage += "\r\n";
 
-	TArray<uint8>ResponseBytes = ConvertStringToByteArray(ResponseMessage);
-	ResponseBytes.Append(ParsedResponseDetails.m_Body);
+	TArray<uint8> *ResponseBytes = new TArray<uint8>();
+	ResponseBytes->Append(ConvertStringToByteArray(ResponseMessage, true));
+	ResponseBytes->Append(ParsedResponseDetails.m_Body);
 
 	FString BodyMessage = UDataConversionLibrary::ConvertByteArrayToString(ParsedResponseDetails.m_Body);
 	ResponseMessage += BodyMessage;
@@ -404,7 +412,7 @@ TArray<uint8> UDataConversionLibrary::ConvertHTTPResponseDetailStructToBytes(FSH
 	FString FullResponseDebugMessage = FString::Printf(TEXT("Response Message:\n%s"), *ResponseMessage);
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FullResponseDebugMessage);
 	UE_LOG(LogTemp, Warning, TEXT("%s"), *FullResponseDebugMessage);
-	return ResponseBytes;
+	return *ResponseBytes;
 }
 
 void UDataConversionLibrary::ParseRequestLine(FString Line, FSHTTPRequestDetails &ParsedRequestDetails)// FString &Verb, FString &RelativeURI, TMap<FString, FString> &QueryParameters, FString &BaseDirectory, TArray<FString> &SubDirectories)
@@ -487,5 +495,5 @@ void UDataConversionLibrary::ParseBody(TArray<FString> Lines, FSHTTPRequestDetai
 		SingleLine += Lines[i] + "\n";
 	}
 	SingleLine.RemoveFromEnd("\n");
-	ParsedRequestDetails.m_Body = UDataConversionLibrary::ConvertStringToByteArray(SingleLine);
+	ParsedRequestDetails.m_Body = UDataConversionLibrary::ConvertStringToByteArray(SingleLine, true);
 }
