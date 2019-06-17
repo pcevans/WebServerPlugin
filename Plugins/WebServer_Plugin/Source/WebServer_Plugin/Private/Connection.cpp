@@ -12,7 +12,7 @@
 void UConnection::Initialize(FSocket *Socket, TArray<uint8> ReceivedData)
 {
 	ConnectionSocket = Socket;
-	RequestDetails = UDataConversionLibrary::ConvertHTTPRequestBytesToDetailStruct(ReceivedData);
+	RequestDetails = UHTTPMessageLibrary::ParseRawRequest(ReceivedData);
 }
 
 void UConnection::SendResponse()
@@ -38,7 +38,7 @@ void UConnection::SendSimpleHTMLResponse(int32 ResponseCode, FString HTML)
 
 void UConnection::CreateAndSendMessage()
 {
-	TArray<uint8> ResponseByteArray = UDataConversionLibrary::ConvertHTTPResponseDetailStructToBytes(ResponseDetails);
+	TArray<uint8> ResponseByteArray = UHTTPMessageLibrary::BuildRawResponse(ResponseDetails);
 
 	int32 BytesSent;
 	ConnectionSocket->Send(ResponseByteArray.GetData(), ResponseByteArray.Num(), BytesSent);

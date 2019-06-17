@@ -11,7 +11,7 @@
 #include "Networking.h"
 
 #include "DataConversionLibrary.h"
-#include "DataStructures.h"
+#include "HTTPMessageLibrary.h"
 
 #include "Connection.generated.h"
 

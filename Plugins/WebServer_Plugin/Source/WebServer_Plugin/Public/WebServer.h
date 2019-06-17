@@ -8,6 +8,7 @@
 
 #include "Connection.h"
 #include "DataConversionLibrary.h"
+#include "HTTPMessageLibrary.h"
 
 #include "WebServer.generated.h"
 

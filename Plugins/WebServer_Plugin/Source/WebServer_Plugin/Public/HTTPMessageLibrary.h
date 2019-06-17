@@ -1,18 +1,15 @@
 #pragma once
 
+#include <string>
+#include <regex>
+
 #include "CoreMinimal.h"
+#include "Engine.h"
+#include "Kismet/BlueprintFunctionLibrary.h"
 
-#include "DataStructures.generated.h"
+#include "DataConversionLibrary.h"
 
-USTRUCT(BlueprintType)
-struct FSDataObject
-{
-	GENERATED_BODY()
-public:
-	UPROPERTY(BlueprintReadWrite)
-		FString Value;
-	TMap<FString, TArray<FSDataObject>> Attributes;
-};
+#include "HTTPMessageLibrary.generated.h"
 
 USTRUCT(BlueprintType)
 struct FSHTTPRequestDetails
@@ -59,9 +56,9 @@ struct FSHTTPResponseDetails
 	GENERATED_BODY()
 
 public:
-		//Response line
-		//e.g. HTTP/1.1 200 OK
-		////// Code = 200
+	//Response line
+	//e.g. HTTP/1.1 200 OK
+	////// Code = 200
 	UPROPERTY(BlueprintReadWrite)
 		int32 m_Code;
 
@@ -82,4 +79,27 @@ public:
 	//Content-Type: text/html\n\n
 	//
 	//<!DOCTYPE html><html><body><h1>My First Web Server</h1><p>You have been served.</p></body></html>
+};
+
+UCLASS()
+class WEBSERVER_PLUGIN_API UHTTPMessageLibrary : public UBlueprintFunctionLibrary
+{
+	GENERATED_BODY()
+
+public:
+	UFUNCTION(BlueprintCallable, Category = "Data Conversion")
+		static FSHTTPRequestDetails ParseRawRequest(TArray<uint8> RequestBytes);
+	UFUNCTION(BlueprintCallable, Category = "Data Conversion")
+		static TArray<uint8> BuildRawResponse(FSHTTPResponseDetails ResponseStruct);
+	UFUNCTION(BlueprintCallable, Category = "Data Conversion")
+		static FString ConvertFileTypeToMIMEType(FString FileExtension);
+	UFUNCTION(BlueprintCallable, Category = "Data Conversion")
+		static FString ConvertStatusCodeToString(int32 StatusCode);
+
+private:
+	//For HTTP request string to struct
+	static void ParseRequestLine(FString Line, FSHTTPRequestDetails &ParsedRequestDetails);
+	static void ParseRequestHeaderLine(FString Line, FSHTTPRequestDetails &ParsedRequestDetails);
+	static void ParseRequestBody(TArray<FString> RequestLines, FSHTTPRequestDetails &ParsedRequestDetails, int32 StartLine);
+
 };

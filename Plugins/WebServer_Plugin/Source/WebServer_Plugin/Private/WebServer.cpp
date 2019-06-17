@@ -152,7 +152,7 @@ void AWebServer::ConnectionSocketLoop()
 							}
 							else
 							{
-								Connection->SetResponseHeader("Content-Type", UDataConversionLibrary::ConvertFileTypeToMIMEType(Extension));
+								Connection->SetResponseHeader("Content-Type", UHTTPMessageLibrary::ConvertFileTypeToMIMEType(Extension));
 							}
 							Connection->SetResponseHeader("Content-Length", FString::FromInt(FileByteArray.Num()));
 							Connection->SetResponseBody(FileByteArray);
